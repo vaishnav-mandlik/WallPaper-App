@@ -6,7 +6,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import Home from "./components/Home/Home";
 import SingleWallpaper from "./components/SingleWallpaper/SingleWallpaper";
-
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 const App = () => {
   const Stack = createNativeStackNavigator();
   const [isOnboarded, setIsOnboarded] = useState(null);
@@ -30,7 +30,7 @@ const App = () => {
 
   if (!isOnboarded) {
     return (
-      <>
+      <GestureHandlerRootView style={{ flex: 1 }}>
         <StatusBar
           barStyle="light-content"
           hidden={false}
@@ -45,14 +45,15 @@ const App = () => {
           >
             <Stack.Screen name="Home" component={Home} />
             <Stack.Screen name="Intro" component={Intro} />
+            <Stack.Screen name="SingleWallpaper" component={SingleWallpaper} />
           </Stack.Navigator>
         </NavigationContainer>
-      </>
+      </GestureHandlerRootView>
     );
   }
 
   return (
-    <>
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <StatusBar
         barStyle="light-content"
         hidden={false}
@@ -70,7 +71,7 @@ const App = () => {
           <Stack.Screen name="SingleWallpaper" component={SingleWallpaper} />
         </Stack.Navigator>
       </NavigationContainer>
-    </>
+    </GestureHandlerRootView>
   );
 };
 

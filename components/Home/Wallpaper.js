@@ -7,16 +7,16 @@ const Wallpaper = ({ item }) => {
   const imageWidth = windowWidth / 3 - 20;
   const navigation = useNavigation();
 
-  const previewWallpaper = () => {
+  const previewWallpaper = (image) => {
     navigation.navigate("SingleWallpaper", {
-      image: item.image.asset.url,
+      image,
     });
   };
 
   return (
     <>
       <TouchableOpacity
-        onPress={previewWallpaper}
+        onPress={() => previewWallpaper(item.image.asset.url)}
         style={{
           borderRadius: 10,
           overflow: "hidden",

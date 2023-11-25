@@ -57,7 +57,7 @@ const Category = () => {
           data={CategoryList}
           horizontal
           showsHorizontalScrollIndicator={false}
-          keyExtractor={(item) => item.name.toString()}
+          keyExtractor={(item) => item.name.toString() + Math.random()}
           renderItem={({ item }) => (
             <CategoryListUi
               item={item}
