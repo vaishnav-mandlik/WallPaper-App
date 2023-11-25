@@ -56,9 +56,6 @@ const Home = () => {
     outputRange: ["0%", "75%"],
   });
 
-  //   setTimeout(() => {
-  //     console.log(searchQuery, "searchQuery");
-  //   }, 1000);
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(null);
 
   useEffect(() => {
@@ -68,13 +65,10 @@ const Home = () => {
           const wallpapers = await getWallpaperByTitle(searchQuery);
           setSearchedWallpaper(wallpapers);
         } catch (error) {
-          console.error("Error fetching wallpapers:", error);
-          // Handle the error as needed
+          console.log(error);
         }
       };
       fetchWallpapers();
-
-      console.log("debouncedSearchQuery", "debouncedSearchQuery");
     }
   }, [debouncedSearchQuery]);
   useEffect(() => {
@@ -103,7 +97,6 @@ const Home = () => {
               autoFocus={true}
               onChange={(e) => {
                 setSearchQuery(e.nativeEvent.text);
-                console.log(e.nativeEvent.text, "e.nativeEvent.text");
               }}
               value={searchQuery}
             />

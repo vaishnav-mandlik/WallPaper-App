@@ -8,13 +8,15 @@ import {
   Platform,
   ToastAndroid,
   ActivityIndicator,
+  Share,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { AntDesign, Entypo, MaterialIcons } from "@expo/vector-icons";
-// import * as Sharing from "expo-sharing";
-import ManageWallpaper, { TYPE } from "react-native-manage-wallpaper";
+import ManageWallpaper from "react-native-manage-wallpaper";
 import BottomSheet from "@gorhom/bottom-sheet";
 import BottomSheetContent from "./BottomSheetContent";
+import * as FileSystem from "expo-file-system";
+import * as MediaLibrary from "expo-media-library";
 
 const SingleWallpaper = () => {
   const route = useRoute();
@@ -37,6 +39,53 @@ const SingleWallpaper = () => {
   };
   const closeBottomSheet = () => {
     bottomSheetRef.current?.close();
+  };
+
+  const downloadImage = async () => {
+    const { status } = await MediaLibrary.requestPermissionsAsync();
+    if (status === "granted") {
+      try {
+        const uri = image;
+        const fileUri = FileSystem.documentDirectory + uri.split("/").pop();
+        const { uri: downloadedUri } = await FileSystem.downloadAsync(
+          uri,
+          fileUri
+        );
+        const asset = await MediaLibrary.createAssetAsync(downloadedUri);
+        await MediaLibrary.createAlbumAsync("WallPics", asset, false);
+        ToastAndroid.showWithGravity(
+          "Wallpaper downloaded in WallPics folder",
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER
+        );
+      } catch (error) {
+        ToastAndroid.showWithGravity(
+          "Something went wrong, please try again",
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER
+        );
+      }
+    } else {
+      ToastAndroid.showWithGravity(
+        "Please grant permission to download image",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    }
+  };
+
+  const shareWallpaper = async () => {
+    try {
+      Share.share({
+        message: image,
+      });
+    } catch (error) {
+      ToastAndroid.showWithGravity(
+        "Something went wrong, please try again",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    }
   };
 
   const setWallpic = async (uri, type) => {
@@ -71,7 +120,9 @@ const SingleWallpaper = () => {
         <Image source={{ uri: image }} className="w-full h-full rounded-3xl" />
       </View>
       <View className="flex-row justify-around items-center border border-[#707070] rounded-2xl mb-10 mx-[8%] bg-[#1c2023]">
-        <AntDesign name="clouddownloado" size={45} color="#707070" />
+        <TouchableOpacity onPress={downloadImage}>
+          <AntDesign name="clouddownloado" size={45} color="#707070" />
+        </TouchableOpacity>
         {settingWallpaper ? (
           <ActivityIndicator size="large" color="#707070" />
         ) : (
@@ -79,7 +130,10 @@ const SingleWallpaper = () => {
             <MaterialIcons name="now-wallpaper" size={38} color="#707070" />
           </TouchableOpacity>
         )}
-        <AntDesign name="sharealt" size={38} color="#707070" />
+
+        <TouchableOpacity onPress={shareWallpaper}>
+          <AntDesign name="sharealt" size={38} color="#707070" />
+        </TouchableOpacity>
       </View>
       <BottomSheet
         ref={bottomSheetRef}

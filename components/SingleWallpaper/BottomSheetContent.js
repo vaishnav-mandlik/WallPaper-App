@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
+import { TYPE } from "react-native-manage-wallpaper";
 
 const BottomSheetContent = ({ image, closeBottomSheet, setWallpic }) => {
   return (
