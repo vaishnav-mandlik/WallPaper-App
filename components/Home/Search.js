@@ -14,7 +14,6 @@ const Search = () => {
 
   const onFocus = () => {
     setIsFocused(true);
-    // Animate the input width
     Animated.timing(animation, {
       toValue: 1,
       duration: 300,
@@ -24,7 +23,6 @@ const Search = () => {
 
   const onBlur = () => {
     if (!searchQuery) {
-      // Assuming you have a state for managing search query
       setIsFocused(false);
       Animated.timing(animation, {
         toValue: 0,
@@ -36,7 +34,7 @@ const Search = () => {
 
   const inputWidth = animation.interpolate({
     inputRange: [0, 1],
-    outputRange: ["20%", "100%"], // Change width values as needed
+    outputRange: ["20%", "100%"],
   });
 
   return (
@@ -46,7 +44,7 @@ const Search = () => {
           ...styles.header,
           opacity: animation.interpolate({
             inputRange: [0, 1],
-            outputRange: [1, 0], // Change opacity values as needed
+            outputRange: [1, 0],
           }),
         }}
       >
