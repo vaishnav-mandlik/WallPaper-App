@@ -1,15 +1,23 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from 'react';
 import {
   Animated,
   View,
   TextInput,
   TouchableOpacity,
   StyleSheet,
-} from "react-native";
-import { AntDesign } from "@expo/vector-icons";
-import Category from "./Category";
-import SearchWallpaper from "./SearchWallpaper";
-import { getWallpaperByTitle } from "../../sanity";
+  StatusBar,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import Category from './Category';
+import SearchWallpaper from './SearchWallpaper';
+import { getWallpaperByTitle } from '../../sanity';
 
 const Home = () => {
   const [isSearchActive, setSearchActive] = useState(false);
@@ -18,9 +26,12 @@ const Home = () => {
   const inputRef = useRef(null);
   const [searchQuery, setSearchQuery] = useState(null);
   const [searchedWallpaper, setSearchedWallpaper] = useState(null);
+  const debounceTimerRef = useRef(null);
 
-  const handleSearchToggle = () => {
+  const handleSearchToggle = useCallback(() => {
     setSearchQuery(null);
+    setSearchedWallpaper(null);
+
     Animated.timing(titleOpacity, {
       toValue: isSearchActive ? 1 : 0,
       duration: 100,
@@ -49,40 +60,52 @@ const Home = () => {
     }
 
     setSearchActive(!isSearchActive);
-  };
+  }, [isSearchActive, titleOpacity, animatedWidth]);
 
-  const inputWidth = animatedWidth.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["0%", "75%"],
-  });
+  const inputWidth = useMemo(
+    () =>
+      animatedWidth.interpolate({
+        inputRange: [0, 1],
+        outputRange: ['0%', '75%'],
+      }),
+    [animatedWidth],
+  );
 
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(null);
+  const handleSearchChange = useCallback(text => {
+    setSearchQuery(text);
 
-  useEffect(() => {
-    if (debouncedSearchQuery) {
-      const fetchWallpapers = async () => {
+    // Clear existing timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // Set new debounce timer (500ms)
+    debounceTimerRef.current = setTimeout(async () => {
+      if (text && text.trim().length > 0) {
         try {
-          const wallpapers = await getWallpaperByTitle(searchQuery);
+          const wallpapers = await getWallpaperByTitle(text);
           setSearchedWallpaper(wallpapers);
         } catch (error) {
-          console.log(error);
+          console.error('Search error:', error);
         }
-      };
-      fetchWallpapers();
-    }
-  }, [debouncedSearchQuery]);
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
+      } else {
+        setSearchedWallpaper(null);
+      }
     }, 500);
+  }, []);
 
+  // Cleanup on unmount
+  useEffect(() => {
     return () => {
-      clearTimeout(handler);
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
     };
-  }, [searchQuery]);
+  }, []);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#25262A" />
       <View style={styles.header}>
         <Animated.Text style={[styles.title, { opacity: titleOpacity }]}>
           WallPics
@@ -95,10 +118,8 @@ const Home = () => {
               placeholder="Search wallpapers"
               placeholderTextColor="#666"
               autoFocus={true}
-              onChange={(e) => {
-                setSearchQuery(e.nativeEvent.text);
-              }}
-              value={searchQuery}
+              onChangeText={handleSearchChange}
+              value={searchQuery || ''}
             />
           )}
         </Animated.View>
@@ -106,55 +127,55 @@ const Home = () => {
           onPress={handleSearchToggle}
           style={styles.searchIcon}
         >
-          <AntDesign
-            name={isSearchActive ? "close" : "search1"}
+          <MaterialIcons
+            name={isSearchActive ? 'close' : 'search'}
             size={24}
             color="white"
           />
         </TouchableOpacity>
       </View>
 
-      {!debouncedSearchQuery ? (
+      {!searchedWallpaper ? (
         <Category />
       ) : (
         <SearchWallpaper data={searchedWallpaper} />
       )}
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#25262A",
+    backgroundColor: '#25262A',
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     padding: 10,
   },
   searchBar: {
-    position: "absolute",
+    position: 'absolute',
     left: 0,
     right: 50,
-    justifyContent: "center",
-    overflow: "hidden",
+    justifyContent: 'center',
+    overflow: 'hidden',
   },
   title: {
     fontSize: 20,
-    fontWeight: "bold",
-    color: "white",
+    fontWeight: 'bold',
+    color: 'white',
   },
   searchInput: {
     fontSize: 18,
-    color: "white",
+    color: 'white',
     paddingHorizontal: 10,
-    width: "100%",
+    width: '100%',
   },
   searchIcon: {
     padding: 5,
   },
 });
 
-export default Home;
+export default React.memo(Home);

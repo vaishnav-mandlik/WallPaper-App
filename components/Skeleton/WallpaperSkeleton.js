@@ -1,4 +1,4 @@
-import { View, Dimensions } from "react-native";
+import { View, Dimensions, Platform } from "react-native";
 import React from "react";
 
 const WallpaperSkeleton = () => {
@@ -32,4 +32,4 @@ const WallpaperSkeleton = () => {
   );
 };
 
-export default WallpaperSkeleton;
+export default React.memo(WallpaperSkeleton);

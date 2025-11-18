@@ -1,5 +1,13 @@
-import { View, StyleSheet, FlatList, ToastAndroid, Text } from "react-native";
-import React, { useLayoutEffect, useState } from "react";
+import {
+  View,
+  StyleSheet,
+  FlatList,
+  ToastAndroid,
+  Text,
+  Image,
+} from "react-native";
+import React, { useLayoutEffect, useState, useCallback, useMemo } from "react";
+import { urlFor } from "../../sanity";
 import {
   fetchCategories,
   fetchWallpaperImages,
@@ -15,7 +23,8 @@ const Category = () => {
     CategoryList[0]?.name || "Nature"
   );
   const [data, setData] = useState(null);
-  const getData = async () => {
+
+  const getData = useCallback(async () => {
     try {
       const data = await fetchCategories();
       setCategoryList(data);
@@ -26,13 +35,30 @@ const Category = () => {
         ToastAndroid.CENTER
       );
     }
-  };
+  }, []);
 
-  const fetchWallpaper = async () => {
+  const fetchWallpaper = useCallback(async () => {
     try {
       const id = await getCategoryId(activeCategory);
       const data = await fetchWallpaperImages(id?._id);
       setData(data);
+      // Prefetch first visible images to improve perceived load time
+      try {
+        const toPrefetch = (data || []).slice(0, 12);
+        toPrefetch.forEach((item) => {
+          const imgSource = item?.image;
+          if (imgSource) {
+            const thumb = urlFor(imgSource)
+              .width(400)
+              .quality(60)
+              .auto("format")
+              .url();
+            Image.prefetch(thumb).catch(() => {});
+          }
+        });
+      } catch (e) {
+        // ignore prefetch failures
+      }
     } catch (error) {
       ToastAndroid.showWithGravity(
         "Something went wrong, please try again",
@@ -40,15 +66,39 @@ const Category = () => {
         ToastAndroid.CENTER
       );
     }
-  };
+  }, [activeCategory]);
+
   useLayoutEffect(() => {
     getData();
     fetchWallpaper();
-  }, [activeCategory]);
+  }, [activeCategory, getData, fetchWallpaper]);
 
-  const handleCategoryPress = (categoryId) => {
+  const handleCategoryPress = useCallback((categoryId) => {
     setActiveCategory(categoryId);
-  };
+  }, []);
+
+  const skeletonData = useMemo(
+    () => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+    []
+  );
+
+  const renderCategory = useCallback(
+    ({ item }) => (
+      <CategoryListUi
+        item={item}
+        isActive={item.name === activeCategory}
+        onPress={handleCategoryPress}
+      />
+    ),
+    [activeCategory, handleCategoryPress]
+  );
+
+  const renderWallpaper = useCallback(
+    ({ item }) => <Wallpaper item={item} />,
+    []
+  );
+
+  const renderSkeleton = useCallback(({ item }) => <WallpaperSkeleton />, []);
 
   return (
     <View style={styles.cardContainer}>
@@ -57,36 +107,53 @@ const Category = () => {
           data={CategoryList}
           horizontal
           showsHorizontalScrollIndicator={false}
-          keyExtractor={(item) => item.name.toString() + Math.random()}
-          renderItem={({ item }) => (
-            <CategoryListUi
-              item={item}
-              isActive={item.name === activeCategory}
-              onPress={handleCategoryPress}
-            />
-          )}
+          keyExtractor={(item, index) =>
+            `${item._id ?? item.name ?? "category"}-${index}`
+          }
+          renderItem={renderCategory}
+          maxToRenderPerBatch={10}
+          updateCellsBatchingPeriod={50}
         />
       </View>
+
       {!data && (
         <View>
           <FlatList
-            data={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]}
+            data={skeletonData}
             numColumns={3}
-            renderItem={({ item }) => <WallpaperSkeleton />}
+            renderItem={renderSkeleton}
+            keyExtractor={(item) => `skeleton-${item}`}
+            maxToRenderPerBatch={12}
+            updateCellsBatchingPeriod={50}
           />
         </View>
       )}
-      <View style={{ flex: 1 }}>
+
+      <View style={styles.wallpaperWrapper}>
         {data && data.length > 0 && (
           <FlatList
             data={data}
             numColumns={3}
-            renderItem={({ item }) => <Wallpaper item={item} />}
+            renderItem={renderWallpaper}
+            keyExtractor={(item, index) =>
+              `${item._id ?? item.title ?? "wallpaper"}-${index}`
+            }
+            initialNumToRender={9}
+            maxToRenderPerBatch={12}
+            updateCellsBatchingPeriod={50}
+            windowSize={7}
+            removeClippedSubviews={true}
+            getItemLayout={(data, index) => {
+              const rowHeight = 170 + 12; // item height + vertical margins
+              const rowIndex = Math.floor(index / 3);
+              return { length: rowHeight, offset: rowIndex * rowHeight, index };
+            }}
           />
         )}
+
         {data && data.length === 0 && (
-          <View className="flex-1 justify-center items-center">
-            <Text className="text-white text-center">Wallpaper not found</Text>
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>Wallpaper not found</Text>
           </View>
         )}
       </View>
@@ -104,6 +171,18 @@ const styles = StyleSheet.create({
   cardContainer: {
     flex: 1,
   },
+  wallpaperWrapper: {
+    flex: 1,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyText: {
+    color: "#FFFFFF",
+    textAlign: "center",
+  },
 });
 
-export default Category;
+export default React.memo(Category);

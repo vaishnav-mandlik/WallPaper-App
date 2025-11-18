@@ -28,13 +28,11 @@ const Intro = () => {
           start={{ x: 0, y: 0 }}
           end={{ x: 0, y: 1 }}
         >
-          <TouchableOpacity className="bg-white p-3 rounded-lg">
-            <Text className="text-center text-white font-bold">
-              jsf sdfwith Google
-            </Text>
+          <TouchableOpacity style={styles.button}>
+            <Text style={styles.buttonText}>Google</Text>
           </TouchableOpacity>
-          {/* Repeat for other login methods */}
-          <Text className="text-white text-center mt-3">Skip</Text>
+
+          <Text style={styles.skipText}>Skip</Text>
         </LinearGradient>
       </ImageBackground>
     </View>
@@ -65,18 +63,18 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: "#fff",
-    padding: 10,
-    borderRadius: 5,
-    marginVertical: 10,
-    borderColor: "#000",
+    padding: 12,
+    borderRadius: 12,
   },
   buttonText: {
-    color: "#000",
+    color: "#ffffff",
+    fontWeight: "bold",
+    textAlign: "center",
   },
   skipText: {
     color: "#fff",
-    alignSelf: "flex-end",
-    margin: 16,
+    textAlign: "center",
+    marginTop: 12,
   },
 });
 

@@ -29,4 +29,4 @@ const CategoryListUi = ({ item, isActive, onPress }) => {
     </TouchableOpacity>
   );
 };
-export default CategoryListUi;
+export default React.memo(CategoryListUi);

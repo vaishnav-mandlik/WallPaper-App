@@ -1,0 +1,4 @@
+/Users/vaishnav/Desktop/WallPics/android/app/.cxx/Debug/5w3k5m3g/armeabi-v7a/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/foo.dir
+/Users/vaishnav/Desktop/WallPics/android/app/.cxx/Debug/5w3k5m3g/armeabi-v7a/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/boo.dir
+/Users/vaishnav/Desktop/WallPics/android/app/.cxx/Debug/5w3k5m3g/armeabi-v7a/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/edit_cache.dir
+/Users/vaishnav/Desktop/WallPics/android/app/.cxx/Debug/5w3k5m3g/armeabi-v7a/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/rebuild_cache.dir

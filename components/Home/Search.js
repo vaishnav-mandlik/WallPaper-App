@@ -22,14 +22,12 @@ const Search = () => {
   };
 
   const onBlur = () => {
-    if (!searchQuery) {
-      setIsFocused(false);
-      Animated.timing(animation, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: false,
-      }).start();
-    }
+    setIsFocused(false);
+    Animated.timing(animation, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
   };
 
   const inputWidth = animation.interpolate({

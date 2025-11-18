@@ -1,24 +1,57 @@
-import { View, Text, FlatList } from "react-native";
-import React from "react";
+import { View, Text, FlatList, StyleSheet } from "react-native";
+import React, { useCallback, useMemo } from "react";
 import Wallpaper from "./Wallpaper";
 
 const SearchWallpaper = (data) => {
+  const renderWallpaper = useCallback(
+    ({ item }) => <Wallpaper item={item} />,
+    []
+  );
+
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.container}>
       {data.data && data.data.length > 0 && (
         <FlatList
           data={data.data}
           numColumns={3}
-          renderItem={({ item }) => <Wallpaper item={item} />}
+          renderItem={renderWallpaper}
+          keyExtractor={(item, index) =>
+            `${item._id ?? item.title ?? "search-wallpaper"}-${index}`
+          }
+          initialNumToRender={9}
+          maxToRenderPerBatch={12}
+          updateCellsBatchingPeriod={50}
+          windowSize={7}
+          removeClippedSubviews={true}
+          getItemLayout={(d, index) => {
+            const rowHeight = 170 + 12; // item height + vertical margins
+            const rowIndex = Math.floor(index / 3);
+            return { length: rowHeight, offset: rowIndex * rowHeight, index };
+          }}
         />
       )}
       {data.data && data.data.length === 0 && (
-        <View className="flex-1 justify-center items-center">
-          <Text className="text-white text-center">Wallpaper not found</Text>
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>Wallpaper not found</Text>
         </View>
       )}
     </View>
   );
 };
 
-export default SearchWallpaper;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyText: {
+    color: "#FFFFFF",
+    textAlign: "center",
+  },
+});
+
+export default React.memo(SearchWallpaper);
