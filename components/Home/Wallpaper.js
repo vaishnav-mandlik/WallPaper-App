@@ -1,12 +1,12 @@
 import {
-  Image as RNImage,
   Animated,
   Dimensions,
   TouchableOpacity,
   Platform,
 } from "react-native";
-import React, { useCallback, useMemo, useEffect, useRef } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import { useNavigation } from "@react-navigation/native";
+import FastImage from "react-native-fast-image";
 import { urlFor } from "../../sanity";
 
 const Wallpaper = ({ item }) => {
@@ -22,14 +22,6 @@ const Wallpaper = ({ item }) => {
     : fullUri;
 
   const imageOpacity = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    const uriToPrefetch = thumbUri || fullUri;
-    if (uriToPrefetch) {
-      // prefetch thumbnail when tile mounts (no-op if already cached)
-      RNImage.prefetch(uriToPrefetch).catch(() => {});
-    }
-  }, [thumbUri, fullUri]);
 
   const previewWallpaper = useCallback(
     (image) => {
@@ -66,29 +58,33 @@ const Wallpaper = ({ item }) => {
           }),
         }}
       >
-        <Animated.Image
-          source={{ uri: thumbUri }}
-          style={{
-            width: imageWidth,
-            height: 170,
-            opacity: imageOpacity,
-            backgroundColor: "#30302F",
-          }}
-          onLoad={() => {
-            Animated.timing(imageOpacity, {
-              toValue: 1,
-              duration: 250,
-              useNativeDriver: true,
+        <Animated.View style={{ opacity: imageOpacity }}>
+          <FastImage
+            source={{ 
+              uri: thumbUri,
+              priority: FastImage.priority.normal,
+              cache: FastImage.cacheControl.immutable,
+            }}
+            style={{
+              width: imageWidth,
+              height: 170,
+              backgroundColor: "#30302F",
+            }}
+            resizeMode={FastImage.resizeMode.cover}
+            onLoad={() => {
+              Animated.timing(imageOpacity, {
+                toValue: 1,
+                duration: 250,
+                useNativeDriver: true,
             }).start();
           }}
-          defaultSource={require("../../assets/icon.png")}
           onError={() => {
             if (__DEV__)
               console.warn("Image failed to load:", thumbUri || fullUri);
             // show placeholder (defaultSource) by leaving opacity 0
           }}
-          progressiveRenderingEnabled={true}
         />
+        </Animated.View>
       </TouchableOpacity>
     </>
   );
