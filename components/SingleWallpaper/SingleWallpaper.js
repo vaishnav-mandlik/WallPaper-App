@@ -65,21 +65,28 @@ const SingleWallpaper = () => {
   const [imageError, setImageError] = useState(false);
 
   // Memoize optimized image URI to prevent re-rendering
-  const buildCenteredUrl = useCallback((baseUrl) => {
+  const buildCenteredUrl = useCallback(baseUrl => {
     const sep = baseUrl.includes('?') ? '&' : '?';
     // Sanity supports w, h, fit, crop, auto, q params for transformation
-    return `${baseUrl}${sep}w=${Math.round(SCREEN_WIDTH)}&h=${Math.round(SCREEN_HEIGHT)}&fit=crop&crop=center&auto=format&q=85`;
+    return `${baseUrl}${sep}w=${Math.round(SCREEN_WIDTH)}&h=${Math.round(
+      SCREEN_HEIGHT,
+    )}&fit=crop&crop=center&auto=format&q=85`;
   }, []);
 
-  const optimizedImageUri = useMemo(() => buildCenteredUrl(image), [image, buildCenteredUrl]);
+  const optimizedImageUri = useMemo(
+    () => buildCenteredUrl(image),
+    [image, buildCenteredUrl],
+  );
 
   useEffect(() => {
     // Prefetch image immediately when component mounts using FastImage
-    FastImage.preload([{
-      uri: optimizedImageUri,
-      priority: FastImage.priority.high,
-      cache: FastImage.cacheControl.immutable,
-    }]);
+    FastImage.preload([
+      {
+        uri: optimizedImageUri,
+        priority: FastImage.priority.high,
+        cache: FastImage.cacheControl.immutable,
+      },
+    ]);
 
     (async () => {
       const granted = await requestMediaPermission();
@@ -176,7 +183,7 @@ const SingleWallpaper = () => {
   }, []);
 
   const setWallpic = useCallback(
-    async (screen) => {
+    async screen => {
       setSettingWallpaper(true);
       closeBottomSheet();
 
@@ -251,7 +258,7 @@ const SingleWallpaper = () => {
           </View>
         )}
         <FastImage
-          source={{ 
+          source={{
             uri: optimizedImageUri,
             priority: FastImage.priority.high,
             cache: FastImage.cacheControl.immutable,
@@ -266,7 +273,7 @@ const SingleWallpaper = () => {
           <View style={styles.imageErrorContainer}>
             <MaterialIcons name="error-outline" size={50} color="#707070" />
             <Text style={styles.imageErrorText}>Failed to load image</Text>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.retryButton}
               onPress={() => {
                 setImageError(false);
