@@ -1,4 +1,4 @@
-package com.wallpics
+package com.vaishnavmandlik.wallpics
 
 import android.app.Application
 import com.facebook.react.PackageList

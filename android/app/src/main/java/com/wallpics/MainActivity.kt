@@ -1,4 +1,4 @@
-package com.wallpics
+package com.vaishnavmandlik.wallpics
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
